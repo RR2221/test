@@ -6,10 +6,12 @@ import { useForm } from 'react-hook-form'
 
 import { supabase } from '@/lib/supabaseClient'
 import { Heading, Form, Input, FormBtn } from '../style'
+import ScaleLoader from 'react-spinners/ScaleLoader'
 
 const Register = () => {
   const router = useRouter()
   const [err, setErr] = useState<AuthError | null>()
+  const [loading, setLoading] = useState<boolean>(false)
   const {
     register,
     handleSubmit,
@@ -17,13 +19,20 @@ const Register = () => {
   } = useForm()
 
   const onRegister = async (values: any) => {
-    const { data, error } = await supabase.auth.signUp({
-      email: values.email,
-      password: values.password,
-    })
-    console.log(data.user, data.session, error)
-    setErr(error)
-    if (!error) router.push('/login')
+    try {
+      setLoading(true)
+      const { data, error } = await supabase.auth.signUp({
+        email: values.email,
+        password: values.password,
+      })
+      setErr(error)
+      if (error) throw error
+      router.push('/login')
+      setLoading(false)
+    } catch (err) {
+      setLoading(false)
+      console.log(err)
+    }
   }
 
   return (
@@ -80,7 +89,10 @@ const Register = () => {
             {errors?.cpassword?.message?.toString()}
           </span>
         </div>
-        <FormBtn>Register</FormBtn>
+        <FormBtn className="flex justify-center items-center gap-x-2">
+          Register
+          {loading && <ScaleLoader color="#ffffff" height={15} width={2} />}
+        </FormBtn>
         <span className="text-red-500 text-sm">{err?.message}</span>
       </Form>
     </>

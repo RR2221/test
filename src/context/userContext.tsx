@@ -8,14 +8,14 @@ import jwt from 'jwt-decode'
 type ContextType = {
   user: User | null
   setUser: (user: User | null) => void
-  isLogin: boolean
-  setIsLogin: (isLogin: boolean) => void
+  isLogin: boolean | null
+  setIsLogin: (isLogin: boolean | null) => void
 }
 
 export const userContext = React.createContext<ContextType>({
   user: null,
   setUser: () => {},
-  isLogin: false,
+  isLogin: null,
   setIsLogin: () => {},
 })
 
@@ -23,31 +23,17 @@ export const useUserContext = () => useContext(userContext)
 
 export const Provider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null)
-  const [isLogin, setIsLogin] = useState<boolean>(false)
+  const [isLogin, setIsLogin] = useState<boolean | null>(null)
   useEffect(() => {
-    // const setToken = async () => {
-    //   try {
-    //     const {
-    //       data: { session },
-    //       error,
-    //     } = await supabase.auth.getSession()
-    //     if (error) throw error
-    //     if (session) {
-    //       localStorage.setItem('token', session.access_token)
-    //       setUser(session.user)
-    //     } else {
-    //       setUser(null)
-    //     }
-    //   } catch (err) {
-    //     console.log(err)
-    //   }
-    // }
-
     const token = localStorage.getItem('token')
     if (token) {
       const { session_id }: { session_id: string } = jwt(token)
-      if (session_id) setIsLogin(true)
-      else setIsLogin(false)
+      if (session_id) {
+        setIsLogin(true)
+        setUser(jwt(token))
+      } else setIsLogin(false)
+    } else {
+      setIsLogin(false)
     }
   }, [])
 

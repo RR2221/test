@@ -33,29 +33,34 @@ const Header = () => {
       const { error } = await supabase.auth.signOut()
       if (error) throw error
       setIsLogin(false)
+      localStorage.removeItem('token')
     } catch (err) {
       console.log(err)
     }
   }
   return (
     <Wrapper>
-      <Heading className="cursor-pointer">
-        <Link href="/">Gpushare.com</Link>
-      </Heading>
-      {!isLogin && (
-        <div className="flex gap-5">
-          <Button className="cursor-pointer">
-            <Link href="/register">Register</Link>
-          </Button>
-          <Button className="cursor-pointer">
-            <Link href="/login">Login</Link>
-          </Button>
-        </div>
-      )}
-      {isLogin && (
-        <Button onClick={onLogout} className="cursor-pointer">
-          Log out
-        </Button>
+      <Link href="/">
+        <Heading className="cursor-pointer">Gpushare.com</Heading>
+      </Link>
+      {isLogin !== null && (
+        <>
+          {!isLogin && (
+            <div className="flex gap-5">
+              <Link href="/register">
+                <Button className="cursor-pointer">Register</Button>
+              </Link>
+              <Link href="/login">
+                <Button className="cursor-pointer">Login</Button>
+              </Link>
+            </div>
+          )}
+          {isLogin && (
+            <Button onClick={onLogout} className="cursor-pointer">
+              Log out
+            </Button>
+          )}
+        </>
       )}
     </Wrapper>
   )

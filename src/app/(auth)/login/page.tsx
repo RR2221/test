@@ -9,11 +9,11 @@ import { useForm } from 'react-hook-form'
 import { Heading, Form, Input, FormBtn } from '../style'
 import { AuthError } from '@supabase/supabase-js'
 import { useUserContext } from '@/context/userContext'
-import RotateLoader from 'react-spinners/RotateLoader'
+import ScaleLoader from 'react-spinners/ScaleLoader'
 
 const Login = () => {
   const router = useRouter()
-  const { setUser, setIsLogin } = useUserContext()
+  const { setUser, setIsLogin, isLogin } = useUserContext()
   const [loading, setLoading] = useState<boolean>(false)
   const {
     register,
@@ -64,16 +64,16 @@ const Login = () => {
         <span className="flex justify-end text-red-400 text-sm">
           {err?.message}
         </span>
-        <FormBtn className="flex items-center justify-center">
+        <FormBtn className="flex items-center justify-center gap-x-2">
           Login
-          {loading && <RotateLoader color="#36d7b7" />}
+          {loading && <ScaleLoader color="#ffffff" height={15} width={2} />}
         </FormBtn>
       </Form>
       <span className="text-sm">
         New User?{' '}
-        <span className="text-sky-600">
-          <Link href="/register">Create Account</Link>
-        </span>
+        <Link href="/register">
+          <span className="text-sky-600">Create Account</span>
+        </Link>
       </span>
     </>
   )

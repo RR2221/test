@@ -18,7 +18,7 @@ const AddArticle = () => {
     try {
       const { error } = await supabase
         .from('articles')
-        .insert([{ title, content, img_path: imgPath, count }])
+        .insert([{ title, content, img_path: imgPath, count, parent_id: 0 }])
       if (error) throw error
       setValue('title', '')
       setValue('content', '')

@@ -1,6 +1,10 @@
 import React from 'react'
 import { useRouter } from 'next/navigation'
-import { BsFillHandThumbsUpFill, BsFillReplyFill } from 'react-icons/bs'
+import { supabase } from '@/lib/supabaseClient'
+
+interface Article {
+  views: number
+}
 
 const BoardItem = ({
   id,
@@ -14,7 +18,7 @@ const BoardItem = ({
   id: number
   title: string | null
   created: string | null
-  votes: number
+  votes: string[] | null
   posts: number
   views: number
   count: number
@@ -35,8 +39,16 @@ const BoardItem = ({
     return 'null'
   }
 
-  const onDetail = () => {
-    router.push(`\\detail\\${id}`)
+  const onDetail = async () => {
+    try {
+      router.push(`\\detail\\${id}`)
+      await supabase
+        .from('articles')
+        .update({ views: views + 1 })
+        .eq('id', id)
+    } catch (err) {
+      console.log(err)
+    }
   }
   return (
     <div className="flex w-full overflow-hidden mb-3 p-3 ">
@@ -56,7 +68,7 @@ const BoardItem = ({
 
         <div className="flex gap-x-16">
           <div className="flex flex-col items-center justify-center">
-            <div className="text-xl">{votes}</div>
+            <div className="text-xl">{votes?.length || 0}</div>
             <div className="text-sm text-gray-400">VOTES</div>
           </div>
           <div className="flex flex-col items-center justify-center">
@@ -68,10 +80,6 @@ const BoardItem = ({
             <div className="text-sm text-gray-400">VIEWS</div>
           </div>
         </div>
-      </div>
-      <div className="flex pl-4 gap-x-5 items-center">
-        <BsFillHandThumbsUpFill className="cursor-pointer w-full h-[30px] text-yellow-400 hover:text-yellow-500 active:text-yellow-400" />
-        <BsFillReplyFill className="cursor-pointer w-full h-[30px] text-black-500 hover:text-gray-300 active:text-black" />
       </div>
     </div>
   )

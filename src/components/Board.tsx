@@ -10,7 +10,7 @@ interface Article {
   title: string | null
   count: number
   created_at: string | null
-  votes: number
+  votes: string[] | null
   posts: number
   views: number
 }
@@ -32,6 +32,7 @@ const Board = () => {
         const { data, error } = await supabase
           .from('articles')
           .select('id, title, created_at,votes,posts,views,count')
+          .order('id', { ascending: false })
         if (error) throw error
         setLoading(false)
         SetArticles(data)

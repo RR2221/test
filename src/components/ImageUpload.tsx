@@ -46,7 +46,7 @@ const ImageUpload = ({
   }
 
   return (
-    <div>
+    <div className="w-full">
       {url && (
         <Image
           src={url}

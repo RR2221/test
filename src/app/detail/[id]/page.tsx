@@ -8,6 +8,8 @@ import { AiFillCloseCircle } from 'react-icons/ai'
 import { BsFillHandThumbsUpFill, BsFillReplyFill } from 'react-icons/bs'
 import { useUserContext } from '@/context/userContext'
 import tw from 'tailwind-styled-components'
+import ImageUpload from '@/components/ImageUpload'
+import ImageDownload from '@/components/ImageDownload'
 interface Article {
   title: string
   content: string
@@ -15,30 +17,41 @@ interface Article {
   votes: string[] | null
 }
 
+interface Reply {
+  content: string
+  img_path: string
+}
+
+const Area = tw.textarea`
+rounded-xl
+p-[10px]
+border-2 border-stone-300/200
+resize-none
+`
+interface VoteProps {
+  $vote: boolean
+}
+
 const DetailView = ({ params }: { params: { id: number } }) => {
+  const { user } = useUserContext()
+  const [url, setUrl] = useState<string | null>(null)
   const [data, setData] = useState<Article | null>(null)
-  const [imgUrl, setImgUrl] = useState<string>('')
-  const [loading, setLoading] = useState<boolean>(false)
-  const [zoom, setZoom] = useState<boolean>(false)
-  const { user, setUser } = useUserContext()
   const [index, setIndex] = useState<number>(-1)
   const [isVote, setIsVote] = useState<boolean>(false)
-  useEffect(() => {
-    const downloadImage = async (path: string) => {
-      try {
-        const { data, error } = await supabase.storage
-          .from('appends')
-          .download(path)
-        if (error) throw error
-        const url = URL.createObjectURL(data)
-        setImgUrl(url)
-        setLoading(false)
-      } catch (err) {
-        setLoading(false)
-        console.log(err)
-      }
-    }
+  const [loading, setLoading] = useState<boolean>(false)
+  const [isReply, setIsReply] = useState<boolean>(false)
+  const [imgPath, setImgPath] = useState<string | null>(null)
+  const [replies, setReplies] = useState<Reply[] | null>(null)
+  const [replyContent, setReplyContent] = useState<string>('')
+  const [isReplyAdded, setIsReplyAdded] = useState<number>(0)
 
+  const Vote = tw.label<VoteProps>`
+  ${(p) => (p.$vote ? 'text-yellow-400' : 'text-gray-400')}
+  cursor-pointer  
+  hover:text-yellow-500
+  active:text-yellow-400
+  `
+  useEffect(() => {
     const getData = async () => {
       try {
         setLoading(true)
@@ -46,20 +59,15 @@ const DetailView = ({ params }: { params: { id: number } }) => {
           .from('articles')
           .select('title,content,img_path,votes')
           .eq('id', params.id)
+        setLoading(false)
         if (error) throw error
         setData(data[0])
-        if (data[0].img_path) downloadImage(data[0].img_path)
-        else {
-          setLoading(false)
-        }
       } catch (err) {
-        setLoading(false)
         console.log(err)
       }
     }
     getData()
   }, [params.id])
-
   useEffect(() => {
     if (data?.votes && user?.email) {
       const { votes } = data
@@ -71,12 +79,27 @@ const DetailView = ({ params }: { params: { id: number } }) => {
       setIndex(id)
     }
   }, [data, user?.email])
-
+  useEffect(() => {
+    const getReplies = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('replies')
+          .select('content,img_path')
+          .eq('parent_id', params.id)
+        if (error) throw error
+        setReplies(data)
+      } catch (err) {
+        console.log(err)
+      }
+    }
+    getReplies()
+  }, [params.id, isReplyAdded])
   const onVote = async () => {
     if (!loading && data && user && user.email) {
       let newVotes: string[]
       if (data.votes) newVotes = data.votes
       else newVotes = []
+      setIsVote(!isVote)
       if (index === -1) {
         newVotes.push(user.email)
         setIndex(newVotes.length - 1)
@@ -88,71 +111,97 @@ const DetailView = ({ params }: { params: { id: number } }) => {
         .from('articles')
         .update({ votes: newVotes })
         .eq('id', params.id)
-      setIsVote(!isVote)
     }
   }
-  interface VoteProps {
-    $vote: boolean
+  const onReply = async () => {
+    try {
+      const { error } = await supabase
+        .from('replies')
+        .insert([
+          { content: replyContent, img_path: imgPath, parent_id: params.id },
+        ])
+      if (error) throw error
+      setReplyContent('')
+      setUrl('')
+      setImgPath('')
+      setIsReplyAdded(isReplyAdded + 1)
+    } catch (err) {
+      console.log(err)
+    }
   }
-
-  const Vote = tw.label<VoteProps>`
-  ${(p) => (p.$vote ? 'text-yellow-400' : 'text-gray-400')}
-  cursor-pointer  
-  hover:text-yellow-500
-  active:text-yellow-400
-  `
   return (
-    <div className="w-full flex justify-center">
-      {zoom && (
-        <div className="absolute w-full h-[90%] bg-white backdrop-blur-xl flex justify-center items-center">
-          <Image
-            src={imgUrl}
-            alt="img"
-            width={50}
-            height={50}
-            blurDataURL={'@/assets/images/logo.png'}
-            className="w-[50%] max-h-[90%]"
-          ></Image>
-          <AiFillCloseCircle
-            className="absolute right-10 top-10"
-            width={30}
-            height={30}
-            onClick={() => setZoom(false)}
-          />
-        </div>
-      )}
-      <Container>
-        <div>
-          <div className="text-3xl text-blue-400">{data?.title}</div>
-          <div className="flex justify-end">
-            <div className="flex pl-4 gap-x-5 items-center">
-              <Vote $vote={isVote} onClick={onVote}>
-                <BsFillHandThumbsUpFill className="w-full h-[30px]" />
-              </Vote>
-              <BsFillReplyFill className="cursor-pointer w-full h-[30px] text-gray-500 hover:text-gray-300 active:text-black" />
+    <div className="w-full h-screen flex-col">
+      <div className="w-full h-[75%]  flex justify-center ">
+        <Container className="shadow-sm overflow-y-scroll scroll-smooth">
+          <div>
+            <div className="text-3xl text-blue-400">{data?.title}</div>
+            <div className="flex justify-end">
+              <div className="flex pl-4 gap-x-5 items-center">
+                <Vote $vote={isVote} onClick={onVote}>
+                  <BsFillHandThumbsUpFill className="w-full h-[20px]" />
+                </Vote>
+                <div
+                  className="cursor-pointer  text-gray-500 hover:text-gray-300 active:text-black"
+                  onClick={() => setIsReply(!isReply)}
+                >
+                  <BsFillReplyFill className="w-full h-[20px]" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <hr />
+          <div className="px-3 pt-4 gap-y-1 flex flex-col">
+            <div className="text-md">{data?.content}</div>
+            {data?.img_path && <ImageDownload imgPath={data.img_path} />}
+          </div>
+          {replies &&
+            replies.map((item: Reply, key: number) => {
+              return (
+                <div key={key}>
+                  <hr />
+                  <div className="px-3 pt-4 gap-y-1 flex flex-col">
+                    {item.content}
+                    <ImageDownload imgPath={item.img_path} />
+                  </div>
+                </div>
+              )
+            })}
+        </Container>
+      </div>
+      {isReply && (
+        <div className="w-full h-[15%] flex justify-center">
+          <div className="w-full max-w-[900px] flex flex-col gap-y-4">
+            <hr className="w-full" />
+            <span>Content</span>
+            <div className="flex justify-between gap-x-5">
+              <div className="flex flex-col w-full gap-y-5">
+                <Area
+                  className="w-full"
+                  value={replyContent}
+                  onChange={(e) => {
+                    setReplyContent(e.target.value)
+                  }}
+                />
+                <div className="w-full flex justify-end">
+                  <button
+                    onClick={onReply}
+                    className="flex justify-end border w-min px-2 py-1 border-stone-300 rounded-md shadow-sm"
+                  >
+                    Reply
+                  </button>
+                </div>
+              </div>
+              <div className="w-[15%]">
+                <ImageUpload
+                  url={url}
+                  setUrl={setUrl}
+                  setImgPath={setImgPath}
+                />
+              </div>
             </div>
           </div>
         </div>
-        <hr />
-        <div className="px-3 pt-4">
-          <div className="text-sm">{data?.content}</div>
-        </div>
-        {!loading && imgUrl && (
-          <Image
-            src={imgUrl}
-            alt="img"
-            width={50}
-            height={50}
-            blurDataURL={'@/assets/images/logo.png'}
-            onClick={() => setZoom(true)}
-          ></Image>
-        )}
-        {loading && (
-          <div className="w-full flex justify-center">
-            <ClipLoader color="#222222" size={50} speedMultiplier={2} />
-          </div>
-        )}
-      </Container>
+      )}
     </div>
   )
 }

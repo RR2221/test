@@ -13,7 +13,7 @@ import RotateLoader from 'react-spinners/RotateLoader'
 
 const Login = () => {
   const router = useRouter()
-  const { setUser } = useUserContext()
+  const { setUser, setIsLogin } = useUserContext()
   const [loading, setLoading] = useState<boolean>(false)
   const {
     register,
@@ -36,7 +36,9 @@ const Login = () => {
         throw error
       }
       setUser(data.user || null)
-      if (data.user?.id) localStorage.setItem('user', data.user?.id)
+
+      localStorage.setItem('token', data.session.access_token)
+      setIsLogin(true)
       if (!error) router.push('/')
       setLoading(false)
     } catch (err) {

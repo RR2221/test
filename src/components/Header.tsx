@@ -8,11 +8,12 @@ import { supabase } from '@/lib/supabaseClient'
 
 const Wrapper = tw.section`
   flex
-  justify-around
+  justify-between
   w-full
   h-[54px]
   bg-gradient-to-b from-[#54b4eb] via-[#2fa4e7] to-[#1d9ce5]
   items-center
+  px-[20px]
 `
 
 const Heading = tw.h1`
@@ -26,11 +27,12 @@ const Button = tw.h3`
   text-sm
 `
 const Header = () => {
-  const { user, setUser } = useUserContext()
-  const onLogout = () => {
+  const { isLogin, setIsLogin } = useUserContext()
+  const onLogout = async () => {
     try {
-      const data = supabase.auth.signOut()
-      setUser(null)
+      const { error } = await supabase.auth.signOut()
+      if (error) throw error
+      setIsLogin(false)
     } catch (err) {
       console.log(err)
     }
@@ -40,7 +42,7 @@ const Header = () => {
       <Heading className="cursor-pointer">
         <Link href="/">Gpushare.com</Link>
       </Heading>
-      {!user && (
+      {!isLogin && (
         <div className="flex gap-5">
           <Button className="cursor-pointer">
             <Link href="/register">Register</Link>
@@ -50,7 +52,7 @@ const Header = () => {
           </Button>
         </div>
       )}
-      {user && (
+      {isLogin && (
         <Button onClick={onLogout} className="cursor-pointer">
           Log out
         </Button>

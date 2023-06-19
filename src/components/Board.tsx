@@ -40,15 +40,7 @@ const Board = () => {
         console.log(err)
       }
     }
-    const getUser = async () => {
-      try {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser()
-      } catch (err) {}
-    }
     getData()
-    getUser()
   }, [])
 
   return (

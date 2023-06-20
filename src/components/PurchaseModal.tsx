@@ -1,23 +1,49 @@
+import { useUserContext } from '@/context/userContext'
 import React, { useState, useEffect } from 'react'
 import { BsFillCartPlusFill } from 'react-icons/bs'
 import tw from 'tailwind-styled-components'
+import { supabase } from '@/lib/supabaseClient'
 
-const PurchaseModal = () => {
-  const [isOpen, setIsOpen] = useState<boolean>(false)
-  const Modal = tw.div`
-    fixed flex justify-center items-center z-5 p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full 
+interface PurchaseProps {
+  $isBuyer: boolean
+  $isPurchased: boolean
+}
+const Modal = tw.div`
+    fixed flex justify-center items-center z-5 p-4 overflow-x-hidden overflow-y-auto inset-0 h-[calc(100%-1rem)] max-h-full 
   `
+const PurchaseModal = ({ id, isBuyer }: { id: number; isBuyer: boolean }) => {
+  const { user } = useUserContext()
+  const [isOpen, setIsOpen] = useState<boolean>(false)
+  const [isPurchased, setIsPurchased] = useState<boolean>(false)
+  const Purchase = tw.div<PurchaseProps>`
+    ${(p) =>
+      p.$isBuyer || p.$isPurchased ? 'text-yellow-500' : 'text-gray-500'}
+    cursor-pointer   hover:text-yellow-300
+  `
+  const onPurchase = async () => {
+    try {
+      const { error } = await supabase
+        .from('articles')
+        .update({ buyer: user?.email })
+        .eq('id', id)
+      if (error) throw error
+      setIsPurchased(true)
+      setIsOpen(false)
+    } catch (err) {
+      console.log(err)
+    }
+  }
   return (
     <>
-      <button
+      <Purchase
+        $isBuyer={isBuyer}
+        $isPurchased={isPurchased}
         onClick={() => {
           setIsOpen(true)
         }}
       >
-        <div className="cursor-pointer  text-gray-500 hover:text-yellow-300">
-          <BsFillCartPlusFill className="w-full h-[20px]" />
-        </div>
-      </button>
+        <BsFillCartPlusFill className="w-full h-[20px]" />
+      </Purchase>
       {isOpen && (
         <Modal>
           <div className="relative w-full max-w-md max-h-full">
@@ -66,7 +92,7 @@ const PurchaseModal = () => {
                   data-modal-hide="popup-modal"
                   type="button"
                   className="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2"
-                  onClick={() => setIsOpen(false)}
+                  onClick={onPurchase}
                 >
                   Yes, I&#39;m sure.
                 </button>

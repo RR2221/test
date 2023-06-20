@@ -36,10 +36,10 @@ const Register = () => {
 
   return (
     <>
-      <Heading>Register</Heading>
+      <Heading className="xs:flex hidden">Register</Heading>
       <Form onSubmit={handleSubmit(onRegister)}>
         <div className="flex flex-col">
-          <span>Email</span>
+          <span className="xs:flex hidden">Email</span>
           <Input
             placeholder="Enter your email address..."
             {...register('email', {
@@ -55,7 +55,7 @@ const Register = () => {
           </span>
         </div>
         <div className="flex flex-col">
-          <span>Password</span>
+          <span className="xs:flex hidden">Password</span>
           <Input
             type="password"
             {...register('password', {
@@ -72,7 +72,7 @@ const Register = () => {
           </span>
         </div>
         <div className="flex flex-col">
-          <span>Confirm Password</span>
+          <span className="xs:flex hidden">Confirm Password</span>
           <Input
             type="password"
             {...register('cpassword', {

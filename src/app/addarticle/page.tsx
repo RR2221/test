@@ -42,7 +42,7 @@ const AddArticle = () => {
   return (
     <form
       onSubmit={handleSubmit(onArticle)}
-      className="flex flex-col gap-10 w-[500px]"
+      className="flex flex-col gap-10 sm:w-[500px] w-full"
     >
       <div className="flex flex-col gap-2">
         <span>Title:</span>

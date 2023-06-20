@@ -5,6 +5,7 @@ import Link from 'next/link'
 import tw from 'tailwind-styled-components'
 import { useUserContext } from '@/context/userContext'
 import { supabase } from '@/lib/supabaseClient'
+import { BsList } from 'react-icons/bs'
 
 const Wrapper = tw.section`
   flex
@@ -41,12 +42,17 @@ const Header = () => {
   return (
     <Wrapper>
       <Link href="/">
-        <Heading className="cursor-pointer">Gpushare.com</Heading>
+        <Heading className="cursor-pointer ">
+          <div className="flex">
+            <span>G</span>
+            <span className="xs:flex hidden">pushare.com</span>
+          </div>
+        </Heading>
       </Link>
       {isLogin !== null && (
         <>
           {!isLogin && (
-            <div className="flex gap-5">
+            <div className="hidden gap-5 sm:flex">
               <Link href="/register">
                 <Button className="cursor-pointer">Register</Button>
               </Link>
@@ -56,7 +62,10 @@ const Header = () => {
             </div>
           )}
           {isLogin && (
-            <Button onClick={onLogout} className="cursor-pointer">
+            <Button
+              onClick={onLogout}
+              className="cursor-pointer hidden gap-5 sm:flex"
+            >
               Log out
             </Button>
           )}

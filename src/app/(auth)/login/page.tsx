@@ -48,17 +48,17 @@ const Login = () => {
   }
   return (
     <>
-      <Heading>Login</Heading>
+      <Heading className="xs:flex hidden">Login</Heading>
       <Form onSubmit={handleSubmit(onLogin)}>
         <div className="flex flex-col">
-          <span>Email</span>
+          <span className="xs:flex hidden">Email</span>
           <Input
             placeholder="Enter your email address..."
             {...register('email')}
           />
         </div>
         <div className="flex flex-col">
-          <span>Password</span>
+          <span className="xs:flex hidden">Password</span>
           <Input type="password" {...register('password')} />
         </div>
         <span className="flex justify-end text-red-400 text-sm">

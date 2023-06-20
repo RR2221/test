@@ -2,29 +2,13 @@
 import React, { useEffect, useState } from 'react'
 import { Container } from './style'
 import { supabase } from '@/lib/supabaseClient'
-import {
-  BsFillHandThumbsUpFill,
-  BsFillReplyFill,
-  BsFillCartPlusFill,
-} from 'react-icons/bs'
+import { BsFillHandThumbsUpFill, BsFillReplyFill } from 'react-icons/bs'
 import { useUserContext } from '@/context/userContext'
 import tw from 'tailwind-styled-components'
 import ImageUpload from '@/components/ImageUpload'
 import ImageDownload from '@/components/ImageDownload'
 import PurchaseModal from '@/components/PurchaseModal'
-interface Article {
-  title: string
-  content: string
-  img_path: string
-  votes: string[] | null
-  author_email: string
-  price: number
-}
-
-interface Reply {
-  content: string
-  img_path: string
-}
+import { Article, Reply } from '@/types/types'
 
 const Area = tw.textarea`
 rounded-xl
@@ -42,12 +26,14 @@ const DetailView = ({ params }: { params: { id: number } }) => {
   const [data, setData] = useState<Article | null>(null)
   const [index, setIndex] = useState<number>(-1)
   const [isVote, setIsVote] = useState<boolean>(false)
+  const [isBuyer, setIsBuyer] = useState<boolean>(false)
   const [loading, setLoading] = useState<boolean>(false)
   const [isReply, setIsReply] = useState<boolean>(false)
   const [imgPath, setImgPath] = useState<string | null>(null)
   const [replies, setReplies] = useState<Reply[] | null>(null)
   const [replyContent, setReplyContent] = useState<string>('')
   const [isReplyAdded, setIsReplyAdded] = useState<number>(0)
+  const [posts, setPosts] = useState<number[] | null>(null)
 
   const Vote = tw.label<VoteProps>`
   ${(p) => (p.$vote ? 'text-yellow-400' : 'text-gray-400')}
@@ -61,11 +47,12 @@ const DetailView = ({ params }: { params: { id: number } }) => {
         setLoading(true)
         const { data, error } = await supabase
           .from('articles')
-          .select('title,content,img_path,votes,author_email,price')
+          .select('title,content,img_path,votes,author_email,price,posts,buyer')
           .eq('id', params.id)
         setLoading(false)
         if (error) throw error
         setData(data[0])
+        setPosts(data[0].posts)
       } catch (err) {
         console.log(err)
       }
@@ -81,6 +68,13 @@ const DetailView = ({ params }: { params: { id: number } }) => {
       if (id !== -1) setIsVote(true)
       else setIsVote(false)
       setIndex(id)
+    }
+  }, [data, user?.email])
+  useEffect(() => {
+    if (data?.buyer && user?.email) {
+      const { buyer } = data
+      if (buyer === user.email) setIsBuyer(true)
+      else setIsBuyer(false)
     }
   }, [data, user?.email])
   useEffect(() => {
@@ -117,18 +111,36 @@ const DetailView = ({ params }: { params: { id: number } }) => {
         .eq('id', params.id)
     }
   }
+  const IncPostsCount = async (id: number) => {
+    try {
+      if (id) {
+        let newPosts: number[] = []
+        newPosts = posts || []
+        newPosts.push(id)
+        const { error } = await supabase
+          .from('articles')
+          .update({ posts: newPosts })
+          .eq('id', params.id)
+        if (error) throw error
+      }
+    } catch (err) {
+      console.log(err)
+    }
+  }
   const onReply = async () => {
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('replies')
         .insert([
           { content: replyContent, img_path: imgPath, parent_id: params.id },
         ])
+        .select('id')
       if (error) throw error
       setReplyContent('')
       setUrl('')
       setImgPath('')
       setIsReplyAdded(isReplyAdded + 1)
+      IncPostsCount(data[0].id)
     } catch (err) {
       console.log(err)
     }
@@ -150,7 +162,7 @@ const DetailView = ({ params }: { params: { id: number } }) => {
                 >
                   <BsFillReplyFill className="w-full h-[20px]" />
                 </div>
-                <PurchaseModal />
+                <PurchaseModal id={params.id} isBuyer={isBuyer} />
               </div>
             </div>
           </div>
@@ -172,7 +184,7 @@ const DetailView = ({ params }: { params: { id: number } }) => {
                   <hr />
                   <div className="px-3 pt-4 gap-y-1 flex flex-col">
                     {item.content}
-                    <ImageDownload imgPath={item.img_path} />
+                    {item.img_path && <ImageDownload imgPath={item.img_path} />}
                   </div>
                 </div>
               )
@@ -184,7 +196,7 @@ const DetailView = ({ params }: { params: { id: number } }) => {
           <div className="w-full max-w-[900px] flex flex-col gap-y-4">
             <hr className="w-full" />
             <span>Content</span>
-            <div className="flex justify-between gap-x-5">
+            <div className="flex flex-col xs:flex-row justify-between gap-x-5">
               <div className="flex flex-col w-full gap-y-5">
                 <Area
                   className="w-full"
@@ -202,7 +214,7 @@ const DetailView = ({ params }: { params: { id: number } }) => {
                   </button>
                 </div>
               </div>
-              <div className="w-[15%]">
+              <div className="xs:w-[15%] w-full">
                 <ImageUpload
                   url={url}
                   setUrl={setUrl}

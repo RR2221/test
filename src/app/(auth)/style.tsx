@@ -19,9 +19,11 @@ const Form = tw.form`
   bg-stone-100
   border-2 border-stone-300/200
   gap-10
-  p-[48px]
+  sm:p-[48px]
+  p-[10px]
   mt-[20px]
-  w-[400px]
+  sm:w-[400px]
+  w-full
 `
 
 const Input = tw.input`

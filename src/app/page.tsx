@@ -35,8 +35,8 @@ export default function Home() {
           className="w-full h-full overflow-hidden mb-[40px]"
         />
         <hr className="w-full" />
-        <Link href="/addarticle" className="w-min">
-          <button className="w-[115px] h-[38px] bg-blue-500 text-white rounded-xl">
+        <Link href="/addarticle" className="w-full xs:w-min">
+          <button className="xs:w-[115px] w-full h-[38px] bg-blue-500 text-white rounded-xl">
             Post
           </button>
         </Link>

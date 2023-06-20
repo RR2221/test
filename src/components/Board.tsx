@@ -4,16 +4,7 @@ import React, { useEffect, useState } from 'react'
 import ScaleLoader from 'react-spinners/ScaleLoader'
 import { supabase } from '@/lib/supabaseClient'
 import BoardItem from './BoardItem'
-
-interface Article {
-  id: number
-  title: string | null
-  count: number
-  created_at: string | null
-  votes: string[] | null
-  posts: number
-  views: number
-}
+import { Article } from '@/types/types'
 
 const Board = () => {
   const [articles, SetArticles] = useState<Article[] | null>(null)
@@ -24,7 +15,7 @@ const Board = () => {
         setLoading(true)
         const { data, error } = await supabase
           .from('articles')
-          .select('id, title, created_at,votes,posts,views,count')
+          .select('id, title, created_at,votes,views,count,posts')
           .order('id', { ascending: false })
         if (error) throw error
         setLoading(false)
@@ -41,21 +32,10 @@ const Board = () => {
     <div>
       {!loading &&
         articles?.map((item, key) => {
-          return (
-            <BoardItem
-              key={key}
-              id={item.id}
-              title={item.title}
-              created={item.created_at}
-              votes={item.votes}
-              posts={item.posts}
-              views={item.views}
-              count={item.count}
-            />
-          )
+          return <BoardItem key={key} data={item} />
         })}
-      <div className="w-full flex justify-center mt-[20px]">
-        {loading && <ScaleLoader color="#2da3e7" height={50} width={4} />}
+      <div className="w-full flex justify-center mt-[50px]">
+        {loading && <ScaleLoader color="#2da3e7" height={30} width={4} />}
       </div>
     </div>
   )

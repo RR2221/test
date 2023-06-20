@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { supabase } from '@/lib/supabaseClient'
 import ScaleLoader from 'react-spinners/ScaleLoader'
+import { AiOutlineCloudUpload } from 'react-icons/Ai'
 
 const ImageUpload = ({
   url,
@@ -58,25 +59,22 @@ const ImageUpload = ({
         />
       )}
       <label
-        className="button primary border-2 border-dashed border-gray-500 h-[50px] w-full rounded-md flex items-center justify-center "
+        className="button primary border-2 shadow-sm bg-slate-300 border-gray-500 h-[50px] w-full rounded-md flex items-center justify-center "
         htmlFor="single"
       >
         {uploading ? (
           <ScaleLoader color="#2da3e7" height={10} width={3} />
         ) : (
-          'Upload'
+          <AiOutlineCloudUpload className="w-[20px] h-[20px]" />
         )}
       </label>
       <input
-        style={{
-          visibility: 'hidden',
-          position: 'absolute',
-        }}
         type="file"
         id="single"
         accept="image/*"
         onChange={uploadAvatar}
         disabled={uploading}
+        className="hidden absolute"
       />
     </div>
   )

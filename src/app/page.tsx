@@ -1,7 +1,6 @@
 import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import tw from 'tailwind-styled-components'
 
 import Board from '@/components/Board'
@@ -35,7 +34,7 @@ export default function Home() {
           className="w-full h-full overflow-hidden mb-[40px]"
         />
         <hr className="w-full" />
-        <Link href="/addarticle" className="w-full xs:w-min">
+        <Link href="/addarticle" as="/addarticle" className="w-full xs:w-min">
           <button className="xs:w-[115px] w-full h-[38px] bg-blue-500 text-white rounded-xl">
             Post
           </button>

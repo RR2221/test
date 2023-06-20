@@ -15,7 +15,7 @@ const ImageDownload = ({ imgPath }: { imgPath: string }) => {
   const [zoom, setZoom] = useState<boolean>(false)
 
   const ImgWrapper = tw.div<ImgWrapperProps>`
-    ${(p) => (p.$zoom ? 'w-full' : 'w-[100px]')}
+    ${(p) => (p.$zoom ? 'w-full h-auto' : 'w-[10%] h-auto min-w-[50px]')}
     cursor-pointer
   `
   useEffect(() => {
@@ -46,8 +46,9 @@ const ImageDownload = ({ imgPath }: { imgPath: string }) => {
             alt="img"
             width={100}
             height={100}
+            priority={true}
             onClick={() => setZoom(!zoom)}
-            className="w-full h-full"
+            className="w-auto h-auto"
           />
         </ImgWrapper>
       )}

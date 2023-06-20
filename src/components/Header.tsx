@@ -41,7 +41,7 @@ const Header = () => {
   }
   return (
     <Wrapper>
-      <Link href="/">
+      <Link href="/" as="/">
         <Heading className="cursor-pointer ">
           <div className="flex">
             <span>G</span>
@@ -53,10 +53,10 @@ const Header = () => {
         <>
           {!isLogin && (
             <div className="hidden gap-5 sm:flex">
-              <Link href="/register">
+              <Link href="/register" as="/register">
                 <Button className="cursor-pointer">Register</Button>
               </Link>
-              <Link href="/login">
+              <Link href="/login" as="/login">
                 <Button className="cursor-pointer">Login</Button>
               </Link>
             </div>

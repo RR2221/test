@@ -3,7 +3,8 @@ import React, { useState, useEffect } from 'react'
 import { BsFillCartPlusFill } from 'react-icons/bs'
 import tw from 'tailwind-styled-components'
 import { supabase } from '@/lib/supabaseClient'
-
+import { toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 interface PurchaseProps {
   $isBuyer: boolean
   $isPurchased: boolean
@@ -29,6 +30,7 @@ const PurchaseModal = ({ id, isBuyer }: { id: number; isBuyer: boolean }) => {
       if (error) throw error
       setIsPurchased(true)
       setIsOpen(false)
+      toast.success('Purchased Success!')
     } catch (err) {
       console.log(err)
     }

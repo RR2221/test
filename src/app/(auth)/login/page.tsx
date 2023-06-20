@@ -6,6 +6,8 @@ import { useForm } from 'react-hook-form'
 import { useRouter } from 'next/navigation'
 import { AuthError } from '@supabase/supabase-js'
 import ScaleLoader from 'react-spinners/ScaleLoader'
+import { toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 import { supabase } from '@/lib/supabaseClient'
 import { useUserContext } from '@/context/userContext'
@@ -13,7 +15,7 @@ import { Heading, Form, Input, FormBtn } from '../style'
 
 const Login = () => {
   const router = useRouter()
-  const { setUser, setIsLogin, isLogin } = useUserContext()
+  const { setUser, setIsLogin } = useUserContext()
   const [loading, setLoading] = useState<boolean>(false)
   const {
     register,
@@ -31,18 +33,18 @@ const Login = () => {
         email,
         password,
       })
+      setLoading(false)
       if (error) {
+        toast.error(error.message)
         setErr(error)
         throw error
       }
       setUser(data.user || null)
-
-      localStorage.setItem('token', data.session.access_token)
       setIsLogin(true)
-      if (!error) router.push('/')
-      setLoading(false)
+      localStorage.setItem('token', data.session.access_token)
+      router.push('/')
+      toast.success('Welcome!')
     } catch (err) {
-      setLoading(false)
       console.log(err)
     }
   }
@@ -54,16 +56,23 @@ const Login = () => {
           <span className="xs:flex hidden">Email</span>
           <Input
             placeholder="Enter your email address..."
-            {...register('email')}
+            {...register('email', {
+              required: 'Required',
+              pattern: {
+                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                message: 'invalid email address',
+              },
+            })}
           />
+          <span className="flex justify-end text-red-400 text-sm">
+            {errors?.email?.message?.toString()}
+          </span>
         </div>
         <div className="flex flex-col">
           <span className="xs:flex hidden">Password</span>
           <Input type="password" {...register('password')} />
         </div>
-        <span className="flex justify-end text-red-400 text-sm">
-          {err?.message}
-        </span>
+        <span className="flex justify-end text-red-400 text-sm"></span>
         <FormBtn className="flex items-center justify-center gap-x-2">
           Login
           {loading && <ScaleLoader color="#ffffff" height={15} width={2} />}
@@ -71,7 +80,7 @@ const Login = () => {
       </Form>
       <span className="text-sm">
         New User?{' '}
-        <Link href="/register">
+        <Link href="/register" as="/register">
           <span className="text-sky-600">Create Account</span>
         </Link>
       </span>

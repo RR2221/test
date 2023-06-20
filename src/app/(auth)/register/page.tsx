@@ -4,6 +4,8 @@ import { useForm } from 'react-hook-form'
 import { useRouter } from 'next/navigation'
 import { AuthError } from '@supabase/supabase-js'
 import ScaleLoader from 'react-spinners/ScaleLoader'
+import { toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 import { supabase } from '@/lib/supabaseClient'
 import { Heading, Form, Input, FormBtn } from '../style'
@@ -20,15 +22,24 @@ const Register = () => {
 
   const onRegister = async (values: any) => {
     try {
+      const { email, password, cpassword } = values
+      if (password !== cpassword) {
+        toast.warning('Password does not match!')
+        return
+      }
       setLoading(true)
       const { data, error } = await supabase.auth.signUp({
-        email: values.email,
-        password: values.password,
+        email,
+        password,
       })
       setLoading(false)
-      setErr(error)
-      if (error) throw error
+      if (error) {
+        setErr(error)
+        toast.error(error.message)
+        throw error
+      }
       router.push('/login')
+      toast.info('Please confirm your email.')
     } catch (err) {
       console.log(err)
     }

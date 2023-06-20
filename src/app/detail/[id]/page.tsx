@@ -9,6 +9,8 @@ import ImageUpload from '@/components/ImageUpload'
 import ImageDownload from '@/components/ImageDownload'
 import PurchaseModal from '@/components/PurchaseModal'
 import { Article, Reply } from '@/types/types'
+import { toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 const Area = tw.textarea`
 rounded-xl
@@ -101,14 +103,17 @@ const DetailView = ({ params }: { params: { id: number } }) => {
       if (index === -1) {
         newVotes.push(user.email)
         setIndex(newVotes.length - 1)
+        toast.success('Thumbs Up!')
       } else {
         newVotes.splice(index, 1)
         setIndex(-1)
+        toast.success('Thumbs Down!')
       }
-      await supabase
+      const { error } = await supabase
         .from('articles')
         .update({ votes: newVotes })
         .eq('id', params.id)
+      if (error) throw error
     }
   }
   const IncPostsCount = async (id: number) => {
@@ -141,6 +146,7 @@ const DetailView = ({ params }: { params: { id: number } }) => {
       setImgPath('')
       setIsReplyAdded(isReplyAdded + 1)
       IncPostsCount(data[0].id)
+      toast.success('Your reply successfully submitted.')
     } catch (err) {
       console.log(err)
     }

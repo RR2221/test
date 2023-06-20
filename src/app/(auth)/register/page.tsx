@@ -1,12 +1,12 @@
 'use client'
 import React, { useState } from 'react'
+import { useForm } from 'react-hook-form'
 import { useRouter } from 'next/navigation'
 import { AuthError } from '@supabase/supabase-js'
-import { useForm } from 'react-hook-form'
+import ScaleLoader from 'react-spinners/ScaleLoader'
 
 import { supabase } from '@/lib/supabaseClient'
 import { Heading, Form, Input, FormBtn } from '../style'
-import ScaleLoader from 'react-spinners/ScaleLoader'
 
 const Register = () => {
   const router = useRouter()
@@ -25,12 +25,11 @@ const Register = () => {
         email: values.email,
         password: values.password,
       })
+      setLoading(false)
       setErr(error)
       if (error) throw error
       router.push('/login')
-      setLoading(false)
     } catch (err) {
-      setLoading(false)
       console.log(err)
     }
   }

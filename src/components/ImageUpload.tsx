@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { supabase } from '@/lib/supabaseClient'
+import ScaleLoader from 'react-spinners/ScaleLoader'
 
 const ImageUpload = ({
   url,
@@ -57,10 +58,14 @@ const ImageUpload = ({
         />
       )}
       <label
-        className="button primary border-2 border-dashed border-blue-500 h-[50px] w-full flex items-center justify-center "
+        className="button primary border-2 border-dashed border-gray-500 h-[50px] w-full rounded-md flex items-center justify-center "
         htmlFor="single"
       >
-        {uploading ? 'Uploading ...' : 'Upload'}
+        {uploading ? (
+          <ScaleLoader color="#2da3e7" height={10} width={3} />
+        ) : (
+          'Upload'
+        )}
       </label>
       <input
         style={{

@@ -2,27 +2,37 @@
 
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { supabase } from '@/lib/supabaseClient'
-import { Input, Area, PostBtn } from './style'
-import ImageUpload from '@/components/ImageUpload'
 import { useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabaseClient'
+import ImageUpload from '@/components/ImageUpload'
+import { Input, Area, PostBtn } from './style'
+import { useUserContext } from '@/context/userContext'
 
 const AddArticle = () => {
   const router = useRouter()
+  const { user } = useUserContext()
   const { register, handleSubmit, setValue } = useForm()
   const [imgPath, setImgPath] = useState<string | null>(null)
   const [url, setUrl] = useState<string | null>(null)
 
   const onArticle = async (values: any) => {
-    const { title, content, count } = values
+    const { title, content, count, price } = values
     try {
-      const { error } = await supabase
-        .from('articles')
-        .insert([{ title, content, img_path: imgPath, count, parent_id: 0 }])
+      const { error } = await supabase.from('articles').insert([
+        {
+          title,
+          content,
+          img_path: imgPath,
+          count,
+          author_email: user?.email,
+          price,
+        },
+      ])
       if (error) throw error
       setValue('title', '')
       setValue('content', '')
       setValue('count', 0)
+      setValue('price', 0)
       setUrl('')
       router.push('/')
     } catch (err) {
@@ -41,6 +51,10 @@ const AddArticle = () => {
       <div className="flex flex-col gap-2">
         <span>Count:</span>
         <Input {...register('count')} />
+      </div>
+      <div className="flex flex-col gap-2">
+        <span>Price:</span>
+        <Input {...register('price')} />
       </div>
       <div className="flex flex-col gap-1">
         <span>Content:</span>

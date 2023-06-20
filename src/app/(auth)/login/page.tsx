@@ -1,15 +1,15 @@
 'use client'
 
-import React, { useState } from 'react'
 import Link from 'next/link'
+import React, { useState } from 'react'
+import { useForm } from 'react-hook-form'
 import { useRouter } from 'next/navigation'
+import { AuthError } from '@supabase/supabase-js'
+import ScaleLoader from 'react-spinners/ScaleLoader'
 
 import { supabase } from '@/lib/supabaseClient'
-import { useForm } from 'react-hook-form'
-import { Heading, Form, Input, FormBtn } from '../style'
-import { AuthError } from '@supabase/supabase-js'
 import { useUserContext } from '@/context/userContext'
-import ScaleLoader from 'react-spinners/ScaleLoader'
+import { Heading, Form, Input, FormBtn } from '../style'
 
 const Login = () => {
   const router = useRouter()

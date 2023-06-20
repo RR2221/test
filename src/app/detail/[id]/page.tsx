@@ -2,19 +2,23 @@
 import React, { useEffect, useState } from 'react'
 import { Container } from './style'
 import { supabase } from '@/lib/supabaseClient'
-import Image from 'next/image'
-import { ClipLoader } from 'react-spinners'
-import { AiFillCloseCircle } from 'react-icons/ai'
-import { BsFillHandThumbsUpFill, BsFillReplyFill } from 'react-icons/bs'
+import {
+  BsFillHandThumbsUpFill,
+  BsFillReplyFill,
+  BsFillCartPlusFill,
+} from 'react-icons/bs'
 import { useUserContext } from '@/context/userContext'
 import tw from 'tailwind-styled-components'
 import ImageUpload from '@/components/ImageUpload'
 import ImageDownload from '@/components/ImageDownload'
+import PurchaseModal from '@/components/PurchaseModal'
 interface Article {
   title: string
   content: string
   img_path: string
   votes: string[] | null
+  author_email: string
+  price: number
 }
 
 interface Reply {
@@ -57,7 +61,7 @@ const DetailView = ({ params }: { params: { id: number } }) => {
         setLoading(true)
         const { data, error } = await supabase
           .from('articles')
-          .select('title,content,img_path,votes')
+          .select('title,content,img_path,votes,author_email,price')
           .eq('id', params.id)
         setLoading(false)
         if (error) throw error
@@ -136,7 +140,7 @@ const DetailView = ({ params }: { params: { id: number } }) => {
           <div>
             <div className="text-3xl text-blue-400">{data?.title}</div>
             <div className="flex justify-end">
-              <div className="flex pl-4 gap-x-5 items-center">
+              <div className="flex pl-4 gap-x-5">
                 <Vote $vote={isVote} onClick={onVote}>
                   <BsFillHandThumbsUpFill className="w-full h-[20px]" />
                 </Vote>
@@ -146,6 +150,7 @@ const DetailView = ({ params }: { params: { id: number } }) => {
                 >
                   <BsFillReplyFill className="w-full h-[20px]" />
                 </div>
+                <PurchaseModal />
               </div>
             </div>
           </div>
@@ -153,6 +158,12 @@ const DetailView = ({ params }: { params: { id: number } }) => {
           <div className="px-3 pt-4 gap-y-1 flex flex-col">
             <div className="text-md">{data?.content}</div>
             {data?.img_path && <ImageDownload imgPath={data.img_path} />}
+            <div className=" flex justify-end text-gray-500 text-sm">
+              <div className="flex flex-col gap-y-1">
+                <span>price: {data?.price}$</span>
+                <span>owner: {data?.author_email}</span>
+              </div>
+            </div>
           </div>
           {replies &&
             replies.map((item: Reply, key: number) => {

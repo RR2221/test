@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import Image from 'next/image'
-import { supabase } from '@/lib/supabaseClient'
 import tw from 'tailwind-styled-components'
+import Image from 'next/image'
+
+import { supabase } from '@/lib/supabaseClient'
+import ScaleLoader from 'react-spinners/ScaleLoader'
 
 interface ImgWrapperProps {
   $zoom: boolean
@@ -36,9 +38,7 @@ const ImageDownload = ({ imgPath }: { imgPath: string }) => {
   }, [imgPath])
   return (
     <div>
-      {loading && (
-        <div className="w-[2px] h-[2px] bg-black backdrop-blur-sm"></div>
-      )}
+      {loading && <ScaleLoader color="#2da3e7" height={5} width={2} />}
       {!loading && imgUrl && (
         <ImgWrapper $zoom={zoom}>
           <Image

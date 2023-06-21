@@ -12,7 +12,7 @@ import 'react-toastify/dist/ReactToastify.css'
 
 const AddArticle = () => {
   const router = useRouter()
-  const { user } = useUserContext()
+  const { user, isLogin } = useUserContext()
   const { register, handleSubmit, setValue } = useForm()
   const [imgPath, setImgPath] = useState<string | null>(null)
   const [url, setUrl] = useState<string | null>(null)
@@ -20,6 +20,10 @@ const AddArticle = () => {
   const onArticle = async (values: any) => {
     const { title, content, count, price } = values
     try {
+      if (!isLogin) {
+        toast.warning('Please log in first!')
+        return
+      }
       const { error } = await supabase.from('articles').insert([
         {
           title,

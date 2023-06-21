@@ -23,7 +23,7 @@ interface VoteProps {
 }
 
 const DetailView = ({ params }: { params: { id: number } }) => {
-  const { user } = useUserContext()
+  const { user, isLogin } = useUserContext()
   const [url, setUrl] = useState<string | null>(null)
   const [data, setData] = useState<Article | null>(null)
   const [index, setIndex] = useState<number>(-1)
@@ -95,6 +95,10 @@ const DetailView = ({ params }: { params: { id: number } }) => {
     getReplies()
   }, [params.id, isReplyAdded])
   const onVote = async () => {
+    if (!isLogin) {
+      toast.warning('Please log in first.')
+      return
+    }
     if (!loading && data && user && user.email) {
       let newVotes: string[]
       if (data.votes) newVotes = data.votes
@@ -134,6 +138,10 @@ const DetailView = ({ params }: { params: { id: number } }) => {
   }
   const onReply = async () => {
     try {
+      if (!isLogin) {
+        toast.warning('Please log in first.')
+        return
+      }
       const { data, error } = await supabase
         .from('replies')
         .insert([
@@ -164,7 +172,10 @@ const DetailView = ({ params }: { params: { id: number } }) => {
                 </Vote>
                 <div
                   className="cursor-pointer  text-gray-500 hover:text-gray-300 active:text-black"
-                  onClick={() => setIsReply(!isReply)}
+                  onClick={() => {
+                    if (!isLogin) toast.warning('Please log in first.')
+                    else setIsReply(!isReply)
+                  }}
                 >
                   <BsFillReplyFill className="w-full h-[20px]" />
                 </div>

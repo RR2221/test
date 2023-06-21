@@ -13,7 +13,7 @@ const Modal = tw.div`
     fixed flex justify-center items-center z-5 p-4 overflow-x-hidden overflow-y-auto inset-0 h-[calc(100%-1rem)] max-h-full 
   `
 const PurchaseModal = ({ id, isBuyer }: { id: number; isBuyer: boolean }) => {
-  const { user } = useUserContext()
+  const { user, isLogin } = useUserContext()
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [isPurchased, setIsPurchased] = useState<boolean>(false)
   const Purchase = tw.div<PurchaseProps>`
@@ -41,7 +41,8 @@ const PurchaseModal = ({ id, isBuyer }: { id: number; isBuyer: boolean }) => {
         $isBuyer={isBuyer}
         $isPurchased={isPurchased}
         onClick={() => {
-          setIsOpen(true)
+          if (!isLogin) toast.warning('Please log in first.')
+          else setIsOpen(true)
         }}
       >
         <BsFillCartPlusFill className="w-full h-[20px]" />

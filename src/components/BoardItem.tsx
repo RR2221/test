@@ -23,7 +23,7 @@ const BoardItem = ({ data }: { data: Article }) => {
   const onDetail = async () => {
     try {
       router.push(`\\detail\\${data.id}`)
-      if (data.views) {
+      if (data.views === 0 || data.views) {
         const { error } = await supabase
           .from('articles')
           .update({ views: data.views + 1 })
